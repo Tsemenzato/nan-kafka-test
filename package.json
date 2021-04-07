@@ -1,0 +1,24 @@
+{
+  "name": "nan-kafka-test",
+  "version": "1.0.0",
+  "description": "Kafka test",
+  "main": "index.js",
+  "scripts": {
+    "server": "docker-compose up",
+    "read" : "tsc && node ./src/producers/producer.js",
+    "login" : "tsc && node ./src/consumers/chatroomConsumer.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@slack/webhook": "^6.0.0",
+    "ip": "^1.1.5",
+    "kafkajs": "^1.15.0",
+    "npm-hook-receiver": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/ip": "^1.1.0",
+    "typescript": "^4.2.4"
+  }
+}
