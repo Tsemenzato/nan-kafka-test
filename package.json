@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "server": "docker-compose up",
-    "read" : "tsc && node ./src/producers/producer.js",
-    "login" : "tsc && node ./src/consumers/chatroomConsumer.js",
+    "login": "tsc && node ./src/producers/producer.js",
+    "read": "tsc && node ./src/consumers/chatroomConsumer.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
