@@ -15,11 +15,11 @@ const printMessage = async ({
   const kafka = new Kafka(kafkaConfig);
 
   const consumer: Consumer = kafka.consumer({
-    groupId: "test-consumer",
+    groupId: "test-consumer-2",
   });
   await consumer.connect();
   await consumer.subscribe({
-    topic: KafkaTopic.USER_LOGIN,
+    topic: KafkaTopic.USER_ACTIVITY,
     fromBeginning: true,
   });
   await consumer.run({

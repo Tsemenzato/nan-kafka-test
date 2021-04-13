@@ -3,7 +3,7 @@ import {useHistory} from "react-router-dom";
 import {v4 as uuidv4} from "uuid";
 import {KafkaAction, KafkaMessage, KafkaTopic} from "../KafkaHandler/types";
 import {User} from "../types";
-import {io} from "socket.io-client";
+import {io, Socket} from "socket.io-client";
 
 interface UserAuth {
   name: string;
@@ -15,6 +15,7 @@ interface Auth {
   error: any;
   isAuthenticated: boolean;
   login: (user: UserAuth) => void;
+  socket: Socket | null;
 }
 
 const AuthContext = createContext<Auth>({
@@ -23,6 +24,7 @@ const AuthContext = createContext<Auth>({
   error: null,
   isAuthenticated: false,
   login: () => {},
+  socket: null,
 });
 
 export const AuthProvider: React.FunctionComponent = ({children}) => {
@@ -30,6 +32,19 @@ export const AuthProvider: React.FunctionComponent = ({children}) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
+  const [socket, setSocket] = useState<Socket | null>(null);
+
+  const createSocket = (): Socket => {
+    const socket = io("localhost:5000");
+
+    socket.on("connect", () => {
+      console.log(`Socket ${socket.id} connected`);
+    });
+
+    setSocket(socket);
+
+    return socket;
+  };
 
   useEffect(() => {
     const loggedUser = window.sessionStorage.getItem("chat-user");
@@ -63,13 +78,9 @@ export const AuthProvider: React.FunctionComponent = ({children}) => {
         name: userLogin.name,
       };
       window.sessionStorage.setItem("chat-user", JSON.stringify(userData));
-      setIsLoading(false);
-      router.push("/chat");
-      setUser(userData);
-      setError("");
 
       const message: KafkaMessage = {
-        topic: KafkaTopic.USER_LOGIN,
+        topic: KafkaTopic.USER_ACTIVITY,
         messages: [
           {
             key: userData.id,
@@ -81,10 +92,14 @@ export const AuthProvider: React.FunctionComponent = ({children}) => {
           },
         ],
       };
-      const socket = io("localhost:5000");
-      console.log(message);
-      socket.emit("loginMessage", JSON.stringify(message));
-      // socket.disconnect();
+
+      const wsocket = createSocket();
+      wsocket?.emit("userLogin", JSON.stringify(message));
+
+      setIsLoading(false);
+      router.push("/chat");
+      setUser(userData);
+      setError("");
     } else {
       setIsLoading(false);
       setUser(null);
@@ -94,7 +109,7 @@ export const AuthProvider: React.FunctionComponent = ({children}) => {
 
   return (
     <AuthContext.Provider
-      value={{isAuthenticated: !!user, user, login, isLoading, error}}
+      value={{isAuthenticated: !!user, user, login, isLoading, error, socket}}
     >
       <>{children}</>
     </AuthContext.Provider>

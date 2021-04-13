@@ -2,7 +2,8 @@ import {Message} from "kafkajs";
 import {User} from "../types";
 
 export enum KafkaTopic {
-  USER_ACTIVITY = "user_activity_topic",
+  USER_LOGIN = "user_login_topic",
+  USER_LOGOUT = "user_logout_topic",
 }
 
 enum KafkaUserAction {

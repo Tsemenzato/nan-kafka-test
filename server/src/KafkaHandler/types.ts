@@ -2,8 +2,7 @@ import {Message} from "kafkajs";
 import {User} from "../types";
 
 export enum KafkaTopic {
-  USER_LOGIN = "user_login_topic",
-  USER_LOGOUT = "user_login_topic",
+  USER_ACTIVITY = "user_activity_topic",
 }
 
 enum KafkaUserAction {
@@ -11,7 +10,7 @@ enum KafkaUserAction {
   USER_LOGOUT = "logout",
 }
 
-interface UserMessage extends Omit<Message, "value"> {
+export interface UserMessage extends Omit<Message, "value"> {
   value: {
     user: User;
     action: KafkaUserAction;
