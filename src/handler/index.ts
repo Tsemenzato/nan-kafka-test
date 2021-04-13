@@ -5,7 +5,7 @@ import {
   KafkaConfig,
   Producer,
 } from "kafkajs";
-import {KafkaTopic, MessageOption} from "./types";
+import {KafkaTopic, EventOption} from "./types";
 
 export class KafkaHandler {
   private static instance: KafkaHandler;
@@ -29,7 +29,7 @@ export class KafkaHandler {
     }
   }
 
-  async sendEvents(topic: KafkaTopic, events: MessageOption[]) {
+  async sendEvents(topic: KafkaTopic, events: EventOption[]) {
     if (!this.producer) this.producer = this.client.producer();
 
     const stringifyEventValues = events.map((event) => ({
