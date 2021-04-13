@@ -1,6 +1,9 @@
-import { createContext, useContext, useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { User } from '../types';
+import {createContext, useContext, useEffect, useState} from "react";
+import {useHistory} from "react-router-dom";
+import {v4 as uuidv4} from "uuid";
+import {KafkaAction, KafkaMessage, KafkaTopic} from "../KafkaHandler/types";
+import {User} from "../types";
+import {io} from "socket.io-client";
 
 interface UserAuth {
   name: string;
@@ -22,14 +25,14 @@ const AuthContext = createContext<Auth>({
   login: () => {},
 });
 
-export const AuthProvider: React.FunctionComponent = ({ children }) => {
+export const AuthProvider: React.FunctionComponent = ({children}) => {
   const router = useHistory();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState<string>("");
 
   useEffect(() => {
-    const loggedUser = window.sessionStorage.getItem('chat-user');
+    const loggedUser = window.sessionStorage.getItem("chat-user");
 
     if (loggedUser) {
       setUser(JSON.parse(loggedUser));
@@ -40,12 +43,12 @@ export const AuthProvider: React.FunctionComponent = ({ children }) => {
 
   useEffect(() => {
     if (router && router.push && !isLoading) {
-      if (user?.name && router.location.pathname.includes('/login')) {
-        router.push('/app');
+      if (user?.name && router.location.pathname.includes("/login")) {
+        router.push("/app");
       }
 
-      if (!user?.name && !router.location.pathname.includes('/login')) {
-        router.push('/login');
+      if (!user?.name && !router.location.pathname.includes("/login")) {
+        router.push("/login");
       }
     }
   });
@@ -53,21 +56,46 @@ export const AuthProvider: React.FunctionComponent = ({ children }) => {
   const login = (userLogin: UserAuth): void => {
     setIsLoading(true);
 
-    if (userLogin.name.length > 4) {
-      window.sessionStorage.setItem('chat-user', JSON.stringify(userLogin));
+    const nameMinLength = 4;
+    if (userLogin.name.length >= nameMinLength) {
+      const userData: User = {
+        id: uuidv4(),
+        name: userLogin.name,
+      };
+      window.sessionStorage.setItem("chat-user", JSON.stringify(userData));
       setIsLoading(false);
-      router.push('/chat');
-      setUser(userLogin);
-      setError('');
+      router.push("/chat");
+      setUser(userData);
+      setError("");
+
+      const message: KafkaMessage = {
+        topic: KafkaTopic.USER_LOGIN,
+        messages: [
+          {
+            key: userData.id,
+            value: {
+              user: userData,
+              action: KafkaAction.USER_LOGIN,
+              timestamp: Date.now(),
+            },
+          },
+        ],
+      };
+      const socket = io("localhost:5000");
+      console.log(message);
+      socket.emit("loginMessage", JSON.stringify(message));
+      // socket.disconnect();
     } else {
       setIsLoading(false);
       setUser(null);
-      setError('Name must be longer than 4 characters');
+      setError(`Name must be longer than ${nameMinLength - 1} characters`);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated: !!user, user, login, isLoading, error }}>
+    <AuthContext.Provider
+      value={{isAuthenticated: !!user, user, login, isLoading, error}}
+    >
       <>{children}</>
     </AuthContext.Provider>
   );

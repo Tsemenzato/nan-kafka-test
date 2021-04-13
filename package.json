@@ -33,6 +33,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@hookform/error-message": "^2.0.0",
     "@slack/webhook": "^6.0.0",
     "ip": "^1.1.5",
     "kafkajs": "^1.15.0",
@@ -42,19 +43,21 @@
     "react-hook-form": "^7.0.5",
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.3",
+    "socket.io-client": "^4.0.1",
     "styled-components": "^5.2.3",
     "typescript": "^4.1.2",
-    "web-vitals": "^1.0.1",
-    "@hookform/error-message": "^2.0.0"
+    "uuid": "^8.3.2",
+    "web-vitals": "^1.0.1"
   },
   "devDependencies": {
     "@types/ip": "^1.1.0",
-    "typescript": "^4.2.4",
     "@types/jest": "^26.0.15",
     "@types/node": "^12.0.0",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
     "@types/react-router-dom": "^5.1.7",
-    "@types/styled-components": "^5.1.9"
+    "@types/styled-components": "^5.1.9",
+    "@types/uuid": "^8.3.0",
+    "typescript": "^4.2.4"
   }
 }
