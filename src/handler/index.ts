@@ -51,4 +51,40 @@ export class KafkaHandler {
 
     return consumer;
   }
+
+  async createTopic(topic: string) {
+    const admin = this.client.admin();
+    await admin.connect();
+
+    const created = await admin.createTopics({topics: [{topic}]});
+    await admin.disconnect();
+
+    return created;
+  }
+
+  async deleteTopic(topic: string) {
+    const data = this.fetchTopicMetadata(topic);
+    if (!data) return null;
+
+    const admin = this.client.admin();
+    await admin.connect();
+
+    const deleted = await admin.deleteTopics({topics: [topic]});
+    await admin.disconnect();
+
+    return deleted;
+  }
+
+  async fetchTopicMetadata(topic: string) {
+    const admin = this.client.admin();
+    await admin.connect();
+
+    try {
+      const metadata = await admin.fetchTopicMetadata({topics: [topic]});
+      return metadata;
+    } catch (error) {
+      await admin.disconnect();
+      return null;
+    }
+  }
 }

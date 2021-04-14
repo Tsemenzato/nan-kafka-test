@@ -21,33 +21,38 @@ const event: EventOption = {
   },
 };
 
-it("should send an event", async (done) => {
-  const saved = await handler.sendEvents(topic, [event]);
+beforeEach(async () => {
+  await handler.createTopic(topic);
+}, 15000);
 
-  expect(saved[0].errorCode).toEqual(0);
-  expect(saved[0].topicName).toEqual(topic);
-
-  done();
+afterEach(async () => {
+  await handler.deleteTopic(topic);
 }, 15000);
 
 it("should consume an event", async (done) => {
-  // jest.useFakeTimers();
-
   const consumer = await handler.getConsumerFor({
     topic,
     groupId: "consumerDelTest",
   });
 
   await consumer.run({
-    eachMessage: async ({topic, partition, message}: EachMessagePayload) => {
+    eachMessage: async ({topic, message}: EachMessagePayload) => {
       const key = message.key.toString();
       const value = JSON.parse(message.value!.toString());
 
-      await consumer.disconnect();
-      console.log(event.value);
-      expect(key).toEqual(event.key);
-      expect(value).toMatchObject(event.value);
-      done();
+      consumer
+        .disconnect()
+        .then(() => {
+          expect(topic).toEqual(topic);
+          expect(key).toEqual(event.key);
+          expect(value).toMatchObject(event.value);
+          done();
+        })
+        .catch((e) => {
+          throw new Error(`Consumer disconnect error: ${e.message}`);
+        });
     },
   });
-}, 15000);
+
+  await handler.sendEvents(topic, [event]);
+}, 10000);
