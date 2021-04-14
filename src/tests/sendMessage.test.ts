@@ -21,18 +21,18 @@ const event: EventOption = {
   },
 };
 
-jest.setTimeout(30000);
+it("should send an event", async (done) => {
+  const saved = await handler.sendEvents(topic, [event]);
 
-// test("send event", async (done) => {
-//   const saved = await handler.sendEvents(topic, [event]);
+  expect(saved[0].errorCode).toEqual(0);
+  expect(saved[0].topicName).toEqual(topic);
 
-//   expect(saved[0].errorCode).toEqual(0);
-//   expect(saved[0].topicName).toEqual(topic);
+  done();
+}, 15000);
 
-//   done();
-// });
+it("should consume an event", async (done) => {
+  // jest.useFakeTimers();
 
-test("consume event", async (done) => {
   const consumer = await handler.getConsumerFor({
     topic,
     groupId: "consumerDelTest",
@@ -43,12 +43,11 @@ test("consume event", async (done) => {
       const key = message.key.toString();
       const value = JSON.parse(message.value!.toString());
 
-      consumer.disconnect();
-      // expect(key).toEqual(event.key);
+      await consumer.disconnect();
+      console.log(event.value);
+      expect(key).toEqual(event.key);
       expect(value).toMatchObject(event.value);
       done();
     },
   });
-
-  await handler.sendEvents(topic, [event]);
-});
+}, 15000);

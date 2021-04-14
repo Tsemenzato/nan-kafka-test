@@ -7,7 +7,7 @@
     "server": "docker-compose up",
     "login": "tsc && node ./src/producers/producer.js",
     "read": "tsc && node ./src/consumers/chatroomConsumer.js",
-    "test": "jest"
+    "test": "jest --runInBand --detectOpenHandles"
   },
   "author": "",
   "license": "ISC",

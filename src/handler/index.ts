@@ -18,15 +18,10 @@ export class KafkaHandler {
     this.client = new Kafka(this.config);
   }
 
-  static getInstance(config: KafkaConfig): KafkaHandler | null {
-    try {
-      this.instance = KafkaHandler.instance || new KafkaHandler(config);
+  static getInstance(config: KafkaConfig): KafkaHandler {
+    this.instance = KafkaHandler.instance || new KafkaHandler(config);
 
-      return this.instance;
-    } catch (error) {
-      console.error(error);
-      return null;
-    }
+    return this.instance;
   }
 
   async sendEvents(topic: KafkaTopic, events: EventOption[]) {
@@ -39,7 +34,14 @@ export class KafkaHandler {
 
     await this.producer.connect();
 
-    await this.producer.send({topic, messages: stringifyEventValues});
+    const saved = await this.producer.send({
+      topic,
+      messages: stringifyEventValues,
+    });
+
+    await this.producer.disconnect();
+
+    return saved;
   }
 
   async getConsumerFor(config: ConsumerConfig & ConsumerSubscribeTopic) {
